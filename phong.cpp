@@ -4,8 +4,8 @@
 #include "phong.h"
 
 Phong* danhSachPhong = NULL;
+LoaiPhong* danhSachLoaiPhong = NULL;
 
-// Ham them phong
 void themPhong() {
     Phong* newPhong = (Phong*)malloc(sizeof(Phong));
     newPhong->next = NULL;
@@ -16,15 +16,15 @@ void themPhong() {
     scanf("%d", &newPhong->soPhong);
     printf("Nhap toa nha: ");
     scanf("%s", newPhong->toaNha);
+    printf("Nhap loai phong: ");
+    scanf("%d", &newPhong->loaiPhong);
 
     newPhong->next = danhSachPhong;
     danhSachPhong = newPhong;
 
-    // Save the updated list to file
     luuDanhSachPhong();
 }
 
-// Ham sua phong
 void suaPhong() {
     char maPhong[10];
     printf("Nhap ma phong can sua: ");
@@ -40,8 +40,9 @@ void suaPhong() {
         scanf("%d", &p->soPhong);
         printf("Nhap toa nha moi: ");
         scanf("%s", p->toaNha);
+        printf("Nhap loai phong moi: ");
+        scanf("%d", &p->loaiPhong);
 
-        // Save the updated list to file
         luuDanhSachPhong();
     } else {
         printf("Khong tim thay phong.\n");
@@ -66,29 +67,26 @@ void xoaPhong() {
         } else {
             prev->next = p->next;
         }
+        free(p);
         printf("Da xoa phong.\n");
 
-        // Save the updated list to file
         luuDanhSachPhong();
     } else {
         printf("Khong tim thay phong.\n");
     }
 }
 
-// Ham them sinh vien vao phong
-
-
 // Ham hien thi danh sach phong
 void hienThiDanhSachPhong() {
     Phong* p = danhSachPhong;
     printf("Danh sach phong:\n");
     while (p != NULL) {
-        printf("Ma phong: %s, So phong: %d, Toa nha: %s\n", p->maPhong, p->soPhong, p->toaNha);
+        printf("Ma phong: %s, So phong: %d, Toa nha: %s, Loai phong: %d\n", p->maPhong, p->soPhong, p->toaNha, p->loaiPhong);
         p = p->next;
     }
 }
 
-// Giai phong bo nho cua toan bo danh sach phong va sinh vien
+
 void giaiPhongBoNho() {
     while (danhSachPhong != NULL) {
         Phong* tempPhong = danhSachPhong;
@@ -107,13 +105,11 @@ void luuDanhSachPhong() {
 
     Phong* p = danhSachPhong;
     while (p != NULL) {
-        fprintf(file, "%s %d %s\n", p->maPhong, p->soPhong, p->toaNha);
-        fprintf(file, "-\n");
+        fprintf(file, "%s %d %s %d\n", p->maPhong, p->soPhong, p->toaNha,p->loaiPhong);
         p = p->next;
     }
 
     fclose(file);
-    printf("Da luu danh sach phong.\n");
 }
 
 
@@ -130,43 +126,185 @@ void taiDanhSachPhong() {
 
     while (1) {
         Phong* newPhong = (Phong*)malloc(sizeof(Phong));
-        if (fscanf(file, "%s %d %s\n", newPhong->maPhong, &newPhong->soPhong, newPhong->toaNha) != 3) {
+        if (fscanf(file, "%s %d %s %d\n", newPhong->maPhong, &newPhong->soPhong, newPhong->toaNha, &newPhong->loaiPhong) != 4) {
             free(newPhong);
             break;
         }
         newPhong->next = danhSachPhong;
         danhSachPhong = newPhong;
 
-        // Doc ky tu "-" de xac nhan ket thuc mot phong
-        char separator[2];
-        fscanf(file, "%s", separator); // doc dau "-"
-
-        if (strcmp(separator, "-") != 0) {
-            printf("Dinh dang file khong hop le.\n");
-            break;
-        }
     }
 
     fclose(file);
     printf("Da tai danh sach phong.\n");
 }
 
+// Ham tim phong theo ma phong
+Phong* timPhong(const char* maPhong) {
+    Phong* p = danhSachPhong;
+    while (p != NULL) {
+        if (strcmp(p->maPhong, maPhong) == 0) {
+            return p; // Tra ve con tro den phong neu tim thay
+        }
+        p = p->next;
+    }
+    return NULL; // Khong tim thay phong
+}
+
+
+// Add a room type
+void themLoaiPhong() {
+    LoaiPhong* newLoaiPhong = (LoaiPhong*)malloc(sizeof(LoaiPhong));
+    newLoaiPhong->next = NULL;
+
+    printf("Nhap ma loai phong: ");
+    scanf("%d", &newLoaiPhong->maLoaiPhong);
+    printf("Nhap so sinh vien: ");
+    scanf("%d", &newLoaiPhong->soSinhVien);
+    printf("Nhap dien tich: ");
+    scanf("%d", &newLoaiPhong->dienTich);
+    printf("Nhap don gia: ");
+    scanf("%d", &newLoaiPhong->donGia);
+
+    newLoaiPhong->next = danhSachLoaiPhong;
+    danhSachLoaiPhong = newLoaiPhong;
+
+    luuDanhSachLoaiPhong();
+}
+
+// Edit a room type
+void suaLoaiPhong() {
+    int maLoaiPhong;
+    printf("Nhap ma loai phong can sua: ");
+    scanf("%d", &maLoaiPhong);
+
+    LoaiPhong* p = danhSachLoaiPhong;
+    while (p != NULL && p->maLoaiPhong != maLoaiPhong) {
+        p = p->next;
+    }
+
+    if (p != NULL) {
+        printf("Nhap so sinh vien moi: ");
+        scanf("%d", &p->soSinhVien);
+        printf("Nhap dien tich moi: ");
+        scanf("%d", &p->dienTich);
+        printf("Nhap don gia moi: ");
+        scanf("%d", &p->donGia);
+
+        luuDanhSachLoaiPhong();
+    } else {
+        printf("Khong tim thay loai phong.\n");
+    }
+}
+
+// Delete a room type
+void xoaLoaiPhong() {
+    int maLoaiPhong;
+    printf("Nhap ma loai phong can xoa: ");
+    scanf("%d", &maLoaiPhong);
+
+    LoaiPhong *p = danhSachLoaiPhong, *prev = NULL;
+    while (p != NULL && p->maLoaiPhong != maLoaiPhong) {
+        prev = p;
+        p = p->next;
+    }
+
+    if (p != NULL) {
+        if (prev == NULL) {
+            danhSachLoaiPhong = p->next;
+        } else {
+            prev->next = p->next;
+        }
+        free(p);
+        printf("Da xoa loai phong.\n");
+
+        luuDanhSachLoaiPhong();
+    } else {
+        printf("Khong tim thay loai phong.\n");
+    }
+}
+
+// Display room type list
+void hienThiDanhSachLoaiPhong() {
+    LoaiPhong* p = danhSachLoaiPhong;
+    printf("Danh sach loai phong:\n");
+    while (p != NULL) {
+        printf("Ma loai phong: %d, So sinh vien: %d, Dien tich: %d, Don gia: %d\n",
+               p->maLoaiPhong, p->soSinhVien, p->dienTich, p->donGia);
+        p = p->next;
+    }
+}
+
+// Free memory for room types
+void giaiPhongBoNhoLoaiPhong() {
+    while (danhSachLoaiPhong != NULL) {
+        LoaiPhong* temp = danhSachLoaiPhong;
+        danhSachLoaiPhong = danhSachLoaiPhong->next;
+        free(temp);
+    }
+}
+
+// Save room types to file
+void luuDanhSachLoaiPhong() {
+    FILE* file = fopen("danhsachloaiphong.txt", "w");
+    if (file == NULL) {
+        printf("Khong the mo file de ghi.\n");
+        return;
+    }
+
+    LoaiPhong* p = danhSachLoaiPhong;
+    while (p != NULL) {
+        fprintf(file, "%d %d %d %d\n", p->maLoaiPhong, p->soSinhVien, 
+                p->dienTich, p->donGia);
+        p = p->next;
+    }
+
+    fclose(file);
+}
+
+// Load room types from file
+void taiDanhSachLoaiPhong() {
+    FILE* file = fopen("danhsachloaiphong.txt", "r");
+    if (file == NULL) {
+        printf("Khong the mo file de doc.\n");
+        return;
+    }
+
+    giaiPhongBoNhoLoaiPhong();
+
+    while (1) {
+        LoaiPhong* newLoaiPhong = (LoaiPhong*)malloc(sizeof(LoaiPhong));
+        if (fscanf(file, "%d %d %d %d\n", &newLoaiPhong->maLoaiPhong,
+                   &newLoaiPhong->soSinhVien, &newLoaiPhong->dienTich,
+                   &newLoaiPhong->donGia) != 4) {
+            free(newLoaiPhong);
+            break;
+        }
+        newLoaiPhong->next = danhSachLoaiPhong;
+        danhSachLoaiPhong = newLoaiPhong;
+    }
+
+    fclose(file);
+    printf("Da tai danh sach loai phong.\n");
+}
+
+
 
 // Menu giao dien
 void menuphong() {
     int choice;
     system("cls");
-    taiDanhSachPhong();
+	
     do {
         printf("\n===== MENU =====\n");
         printf("1. Them phong\n");
         printf("2. Sua phong\n");
         printf("3. Xoa phong\n");
-        printf("4. Them sinh vien vao phong\n");
-        printf("5. Xoa sinh vien khoi phong\n");
-        printf("6. Hien thi sinh vien theo phong\n");
-        printf("7. Hien thi danh sach phong\n");
-        printf("8. Thoat\n");
+        printf("4. Hien thi danh sach phong\n");
+        printf("5. Them loai phong\n");
+        printf("6. Sua loai phong\n");
+        printf("7. Xoa loai phong\n");
+        printf("0. Thoat\n");
         printf("Chon: ");
         scanf("%d", &choice);
 
@@ -174,13 +312,13 @@ void menuphong() {
             case 1: themPhong(); break;
             case 2: suaPhong(); break;
             case 3: xoaPhong(); break;
-//            case 4: themSinhVienVaoPhong(); break;
-//            case 5: xoaSinhVienKhoiPhong(); break;
-//            case 6: hienThiSinhVienTheoPhong(); break;
-            case 7: hienThiDanhSachPhong(); break;
-            case 8: giaiPhongBoNho(); break;
+            case 4: hienThiDanhSachPhong(); break;
+            case 5: themLoaiPhong();break;
+            case 6: suaLoaiPhong();break;
+            case 7: xoaLoaiPhong();break;
+            case 0: giaiPhongBoNho(); break;
             default: printf("Chon sai, vui long chon lai.\n"); break;
         }
-    } while (choice != 8);
+    } while (choice != 0);
 }
 

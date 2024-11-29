@@ -1,125 +1,82 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "sinhvien.h"
+#include "phong.h"
 
 
-// Function Implementations
-void initlist(struct list *l) {
-    l->Head = NULL;
+SinhVien* danhSachSinhVien = NULL;
+
+// Function to create a new SinhVien
+SinhVien* taoSinhVien(char* maSinhVien, char* hoTen, char* ngSinh, char* lop, char* maPhong) {
+    SinhVien* sv = (SinhVien*)malloc(sizeof(SinhVien));
+    strcpy(sv->maSinhVien, maSinhVien);
+    strcpy(sv->hoTen, hoTen);
+    strcpy(sv->ngSinh, ngSinh);
+    strcpy(sv->lop, lop);
+    strcpy(sv->maPhong, maPhong);
+    sv->next = NULL;
+    return sv;
 }
 
-struct node *createnode(struct SinhVien data) {
-    struct node *nd = (struct node *)malloc(sizeof(struct node));
-    if (nd == NULL) {
-        printf("Loi cap phat bo nho \n");
-        return NULL;
-    }
-    nd->data = data;
-    nd->next = NULL;
-    return nd;
-}
+// Add a new SinhVien
+void themSinhVien() {
+    char maSinhVien[10], hoTen[50], ngSinh[50], lop[50], maPhong[10];
+    Phong* phong = NULL;
 
-void docDanhSachSinhVien(struct list *l) {
-    FILE *file = fopen("sinhvien.txt", "r");
-    if (file == NULL) {
-        printf("Khong the mo tep tin de doc!\n");
-        return;
-    }
+    printf("Nhap ma sinh vien: ");
+    scanf("%s", maSinhVien);
 
-    struct SinhVien sv;
-    while (fscanf(file, "%s %s %s %s %s",
-                  sv.maSinhVien, sv.hoTen, sv.ngSinh, sv.lop, sv.maPhong) == 5) {
-        struct node *nd = createnode(sv);
-        if (nd == NULL) {
-            fclose(file);
-            return;
+    printf("Nhap ho ten: ");
+    getchar(); // Consume newline
+    fgets(hoTen, sizeof(hoTen), stdin);
+    strtok(hoTen, "\n"); // Remove trailing newline
+
+    printf("Nhap ngay sinh (dd/mm/yyyy): ");
+    scanf("%s", ngSinh);
+
+    printf("Nhap lop: ");
+    scanf("%s", lop);
+
+    do {
+        printf("Nhap ma phong: ");
+        scanf("%s", maPhong);
+
+        phong = timPhong(maPhong);
+        if (!phong) {
+            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhong);
         }
+    } while (!phong);
 
-        nd->next = l->Head;
-        l->Head = nd;
-    }
+    SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngSinh, lop, maPhong);
+    sv->next = danhSachSinhVien;
+    danhSachSinhVien = sv;
 
-    fclose(file);
+    printf("Them sinh vien thanh cong.\n");
 }
 
-void ghiDanhSachSinhVien(struct list *l) {
-    FILE *file = fopen("sinhvien.txt", "w");
-    if (file == NULL) {
-        printf("Khong the mo tep tin de ghi!\n");
-        return;
-    }
-
-    struct node *current = l->Head;
-    while (current != NULL) {
-        fprintf(file, "%s %s %s %s %s\n",
-                current->data.maSinhVien,
-                current->data.hoTen,
-                current->data.ngSinh,
-                current->data.lop,
-                current->data.maPhong);
-        current = current->next;
-    }
-
-    fclose(file);
-}
-
-void themSinhVien(struct list *l) {
-    struct SinhVien sv;
-
-    printf("\nNhap ma sinh vien: ");
-    fgets(sv.maSinhVien, sizeof(sv.maSinhVien), stdin);
-    sv.maSinhVien[strcspn(sv.maSinhVien, "\n")] = '\0';
-
-    printf("\nNhap ho ten sinh vien: ");
-    fgets(sv.hoTen, sizeof(sv.hoTen), stdin);
-    sv.hoTen[strcspn(sv.hoTen, "\n")] = '\0';
-
-    printf("\nNhap ngay sinh cua sinh vien: ");
-    fgets(sv.ngSinh, sizeof(sv.ngSinh), stdin);
-    sv.ngSinh[strcspn(sv.ngSinh, "\n")] = '\0';
-
-    printf("\nNhap lop cua sinh vien: ");
-    fgets(sv.lop, sizeof(sv.lop), stdin);
-    sv.lop[strcspn(sv.lop, "\n")] = '\0';
-
-    printf("\nNhap ma phong cua sinh vien: ");
-    fgets(sv.maPhong, sizeof(sv.maPhong), stdin);
-    sv.maPhong[strcspn(sv.maPhong, "\n")] = '\0';
-
-    struct node *nd = createnode(sv);
-    if (nd == NULL) return;
-
-    nd->next = l->Head;
-    l->Head = nd;
-
-    ghiDanhSachSinhVien(l);
-    printf("Sinh vien da duoc them vao danh sach.\n");
-}
-
-void hienthiDanhSachSinhVien(struct list *l) {
-    struct node *current = l->Head;
-    if (current == NULL) {
-        printf("Danh sach sinh vien trong!\n");
+// Display all SinhVien in the list
+void hienThiDanhSachSinhVien() {
+    SinhVien* current = danhSachSinhVien;
+    if (!current) {
+        printf("Danh sach sinh vien rong.\n");
         return;
     }
 
     printf("\n--- Danh sach sinh vien ---\n");
-    while (current != NULL) {
-        printf("\nMa sinh vien: %s\n", current->data.maSinhVien);
-        printf("Ho ten: %s\n", current->data.hoTen);
-        printf("Ngay sinh: %s\n", current->data.ngSinh);
-        printf("Lop: %s\n", current->data.lop);
-        printf("Ma phong: %s\n", current->data.maPhong);
-        printf("----------------------------------\n");
+    while (current) {
+        printf("Ma Sinh Vien: %s\n", current->maSinhVien);
+        printf("Ho Ten: %s\n", current->hoTen);
+        printf("Ngay Sinh: %s\n", current->ngSinh);
+        printf("Lop: %s\n", current->lop);
+        printf("Ma Phong: %s\n", current->maPhong);
+        printf("---------------------------\n");
         current = current->next;
     }
 }
 
-struct node *timSinhVien(struct list *l, const char *maSinhVien) {
-    struct node *current = l->Head;
-    while (current != NULL) {
-        if (strcmp(current->data.maSinhVien, maSinhVien) == 0) {
+// Find a SinhVien by maSinhVien
+SinhVien* timSinhVien(const char* maSinhVien) {
+    SinhVien* current = danhSachSinhVien;
+    while (current) {
+        if (strcmp(current->maSinhVien, maSinhVien) == 0) {
             return current;
         }
         current = current->next;
@@ -127,126 +84,207 @@ struct node *timSinhVien(struct list *l, const char *maSinhVien) {
     return NULL;
 }
 
-void suaSinhVien(struct list *l) {
+// Update SinhVien information
+void suaSinhVien() {
     char maSinhVien[10];
-    printf("\nNhap ma sinh vien can sua: ");
-    fgets(maSinhVien, sizeof(maSinhVien), stdin);
-    maSinhVien[strcspn(maSinhVien, "\n")] = '\0';
+    char maPhong[10];
+    Phong* phong = NULL;
 
-    struct node *svNode = timSinhVien(l, maSinhVien);
-    if (svNode == NULL) {
-        printf("Khong tim thay sinh vien trong danh sach\n");
+    printf("Nhap ma sinh vien can sua: ");
+    scanf("%s", maSinhVien);
+
+    SinhVien* sv = timSinhVien(maSinhVien);
+    if (!sv) {
+        printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
         return;
     }
 
-    printf("\nNhap lai thong tin sinh vien ma %s:\n", maSinhVien);
-    printf("Nhap lai ho ten: ");
-    fgets(svNode->data.hoTen, sizeof(svNode->data.hoTen), stdin);
-    svNode->data.hoTen[strcspn(svNode->data.hoTen, "\n")] = '\0';
+    printf("Nhap thong tin moi:\n");
+    printf("Ho Ten: ");
+    getchar(); // Consume newline
+    fgets(sv->hoTen, sizeof(sv->hoTen), stdin);
+    strtok(sv->hoTen, "\n");
 
-    printf("Nhap lai ngay sinh: ");
-    fgets(svNode->data.ngSinh, sizeof(svNode->data.ngSinh), stdin);
-    svNode->data.ngSinh[strcspn(svNode->data.ngSinh, "\n")] = '\0';
+    printf("Ngay Sinh (dd/mm/yyyy): ");
+    scanf("%s", sv->ngSinh);
 
-    printf("Nhap lai lop: ");
-    fgets(svNode->data.lop, sizeof(svNode->data.lop), stdin);
-    svNode->data.lop[strcspn(svNode->data.lop, "\n")] = '\0';
+    printf("Lop: ");
+    scanf("%s", sv->lop);
 
-    printf("Nhap lai ma phong: ");
-    fgets(svNode->data.maPhong, sizeof(svNode->data.maPhong), stdin);
-    svNode->data.maPhong[strcspn(svNode->data.maPhong, "\n")] = '\0';
+    do {
+        printf("Nhap ma phong: ");
+        scanf("%s", maPhong);
 
-    ghiDanhSachSinhVien(l);
-    printf("\nThong tin sinh vien da duoc sua.\n");
+        phong = timPhong(maPhong);
+        if (!phong) {
+            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhong);
+        }
+    } while (!phong);
+
+    strcpy(sv->maPhong, maPhong);
+    printf("Sua thong tin sinh vien thanh cong.\n");
 }
 
-void xoaSinhVien(struct list *l) {
+// Delete SinhVien
+void xoaSinhVien() {
     char maSinhVien[10];
-    printf("\nNhap ma sinh vien can xoa: ");
-    fgets(maSinhVien, sizeof(maSinhVien), stdin);
-    maSinhVien[strcspn(maSinhVien, "\n")] = '\0';
+    printf("Nhap ma sinh vien can xoa: ");
+    scanf("%s", maSinhVien);
 
-    struct node *current = l->Head;
-    struct node *previous = NULL;
-    while (current != NULL) {
-        if (strcmp(current->data.maSinhVien, maSinhVien) == 0) {
-            if (previous == NULL) {
-                l->Head = current->next;
+    SinhVien *current = danhSachSinhVien, *prev = NULL;
+    while (current) {
+        if (strcmp(current->maSinhVien, maSinhVien) == 0) {
+            if (prev) {
+                prev->next = current->next;
             } else {
-                previous->next = current->next;
+                danhSachSinhVien = current->next;
             }
             free(current);
-            ghiDanhSachSinhVien(l);
-            printf("Sinh vien da duoc xoa khoi danh sach.\n");
+            printf("Xoa sinh vien thanh cong.\n");
             return;
         }
-        previous = current;
+        prev = current;
         current = current->next;
     }
 
-    printf("Sinh vien khong tim thay trong danh sach.\n");
+    printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
 }
 
-void timVaInSinhVien(struct list *l) {
-    char maSinhVien[10];
-    printf("\nNhap ma sinh vien can tim: ");
-    fgets(maSinhVien, sizeof(maSinhVien), stdin);
-    maSinhVien[strcspn(maSinhVien, "\n")] = '\0';
-
-    struct node *svNode = timSinhVien(l, maSinhVien);
-    if (svNode == NULL) {
-        printf("Sinh vien khong tim thay trong danh sach.\n");
-    } else {
-        printf("\nThong tin sinh vien voi ma %s:\n", maSinhVien);
-        printf("Ma Sinh Vien: %s\n", svNode->data.maSinhVien);
-        printf("Ho Ten: %s\n", svNode->data.hoTen);
-        printf("Ngay Sinh: %s\n", svNode->data.ngSinh);
-        printf("Lop: %s\n", svNode->data.lop);
-        printf("Ma Phong: %s\n", svNode->data.maPhong);
+// Free allocated memory
+void giaiPhongBoNhoSinhVien() {
+    SinhVien* current = danhSachSinhVien;
+    while (current) {
+        SinhVien* temp = current;
+        current = current->next;
+        free(temp);
     }
+    danhSachSinhVien = NULL;
 }
 
-void menusv() {
-    struct list l;
-    initlist(&l);
-    docDanhSachSinhVien(&l);
+// Save SinhVien list to file
+void luuDanhSachSinhVien() {
+    FILE* file = fopen("sinhvien.txt", "w");
+    if (!file) {
+        printf("Khong mo duoc file.\n");
+        return;
+    }
 
-    int choice;
+    SinhVien* current = danhSachSinhVien;
+    while (current) {
+        fprintf(file, "%s %s %s %s %s\n", 
+                current->maSinhVien, 
+                current->hoTen, 
+                current->ngSinh, 
+                current->lop, 
+                current->maPhong);
+        current = current->next;
+    }
+    fclose(file);
+    printf("Luu danh sach sinh vien thanh cong.\n");
+}
+
+// Load SinhVien list from file
+void taiDanhSachSinhVien() {
+    FILE* file = fopen("sinhvien.txt", "r");
+    if (!file) {
+        printf("Khong mo duoc file.\n");
+        return;
+    }
+
+    char maSinhVien[10], hoTen[50], ngSinh[50], lop[50], maPhong[10];
+    while (fscanf(file, "%s %s %s %s %s", maSinhVien, hoTen, ngSinh, lop, maPhong) == 5) {
+        SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngSinh, lop, maPhong);
+        sv->next = danhSachSinhVien;
+        danhSachSinhVien = sv;
+    }
+    fclose(file);
+}
+
+// Function to add a student to a room
+void themSinhVienVaoPhong() {
+    char maSinhVien[10];
+    char maPhong[10];
+    Phong* phong = NULL;
+
+    printf("Nhap ma sinh vien: ");
+    scanf("%s", maSinhVien);
+
+    SinhVien* sv = timSinhVien(maSinhVien);
+    if (!sv) {
+        printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
+        return;
+    }
+
     do {
-        printf("\n--- MENU QUAN LY SINH VIEN ---\n");
+        printf("Nhap ma phong: ");
+        scanf("%s", maPhong);
+
+        phong = timPhong(maPhong);
+        if (!phong) {
+            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhong);
+        }
+    } while (!phong);
+
+    strcpy(sv->maPhong, maPhong);
+    printf("Da them sinh vien %s vao phong %s.\n", maSinhVien, maPhong);
+}
+
+// Function to transfer a student to another room
+void chuyenPhongChoSinhVien() {
+    char maSinhVien[10];
+    char maPhongMoi[10];
+    Phong* phongMoi = NULL;
+
+    printf("Nhap ma sinh vien: ");
+    scanf("%s", maSinhVien);
+
+    SinhVien* sv = timSinhVien(maSinhVien);
+    if (!sv) {
+        printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
+        return;
+    }
+
+    do {
+        printf("Nhap ma phong moi: ");
+        scanf("%s", maPhongMoi);
+
+        phongMoi = timPhong(maPhongMoi);
+        if (!phongMoi) {
+            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhongMoi);
+        }
+    } while (!phongMoi);
+
+    strcpy(sv->maPhong, maPhongMoi);
+    printf("Da chuyen sinh vien %s sang phong %s.\n", maSinhVien, maPhongMoi);
+}
+
+
+// Menu for SinhVien functions
+void menusv() {
+    int choice;
+    system("cls");
+    do {
+        printf("\n--- Menu Sinh Vien ---\n");
         printf("1. Them sinh vien\n");
         printf("2. Hien thi danh sach sinh vien\n");
-        printf("3. Sua thong tin sinh vien\n");
+        printf("3. Sua sinh vien\n");
         printf("4. Xoa sinh vien\n");
-        printf("5. Tim sinh vien\n");
-        printf("6. Thoat\n");
-        printf("Nhap lua chon cua ban: ");
+        printf("5. Them sinh vien vao phong\n");
+        printf("6. Chuyen phong cho sinh vien\n");
+        printf("0. Thoat\n");
+        printf("Chon chuc nang: ");
         scanf("%d", &choice);
-        getchar(); // Consume newline
 
         switch (choice) {
-            case 1:
-                themSinhVien(&l);
-                break;
-            case 2:
-                hienthiDanhSachSinhVien(&l);
-                break;
-            case 3:
-                suaSinhVien(&l);
-                break;
-            case 4:
-                xoaSinhVien(&l);
-                break;
-            case 5:
-                timVaInSinhVien(&l);
-                break;
-            case 6:
-                printf("Thoat chuong trinh.\n");
-                ghiDanhSachSinhVien(&l);
-                break;
-            default:
-                printf("Lua chon khong hop le. Vui long thu lai.\n");
+            case 1: themSinhVien();luuDanhSachSinhVien(); break;
+            case 2: hienThiDanhSachSinhVien(); break;
+            case 3: suaSinhVien();luuDanhSachSinhVien(); break;
+            case 4: xoaSinhVien();luuDanhSachSinhVien(); break;
+            case 5: themSinhVienVaoPhong();luuDanhSachSinhVien(); break;
+            case 6: chuyenPhongChoSinhVien();luuDanhSachSinhVien(); break;
+            case 0: break;
+            default: printf("Lua chon sai, vui long chon lai.\n"); break;
         }
-    } while (choice != 6);
+    } while (choice != 0);
 }
 
