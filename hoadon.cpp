@@ -1,21 +1,18 @@
 #include "hoadon.h"
-
+#include "utils.cpp"
 struct HoaDon *danhSachHoaDon = NULL;
 char maHoaDon[20];
 
-
-// Kiem tra ma phong da ton tai hay chua
 int kiemTraMaPhongTonTai(struct HoaDon *danhSachHoaDon, const char *maPhong) {
     struct HoaDon *current = danhSachHoaDon;
     while (current != NULL) {
         if (strcmp(current->maPhong, maPhong) == 0) {
-            return 1; // Ma phong ton tai
+            return 1; 
         }
         current = current->next;
     }
-    return 0; // Ma phong khong ton tai
+    return 0; 
 }
-
 
 void taoMaHoaDon(char *maHoaDon) {
     int soLuongHoaDon = 0;
@@ -41,35 +38,48 @@ void themHoaDon() {
     printf("Nhap ma phong: ");
     scanf("%s", newHoaDon->maPhong);
 
-    // Use timPhong to check if the room exists
     if (timPhong(newHoaDon->maPhong) == NULL) {
-        printf("Phong %s khong ton tai. Khong the them hoa don.\n", newHoaDon->maPhong);
-        free(newHoaDon);
+        printf("Phòng %s không t?n t?i. Không th? thêm hóa don.\n", newHoaDon->maPhong);
+        free(newHoaDon); 
         return;
     }
-
+    
     if (kiemTraMaPhongTonTai(danhSachHoaDon, newHoaDon->maPhong)) {
         printf("Ma phong da ton tai, vui long nhap ma phong khac.\n");
+        free(newHoaDon); 
+        return;
+    }
+
+    int soDien, soNuoc, soNgay;
+    printf("Nhap so dien: ");
+    if (scanf("%d", &soDien) != 1 || soDien < 0) {
+        printf("So dien khong hop le.\n");
+        free(newHoaDon); 
+        return;
+    }
+
+    printf("Nhap so nuoc: ");
+    if (scanf("%d", &soNuoc) != 1 || soNuoc < 0) {
+        printf("So nuoc khong hop le.\n");
         free(newHoaDon);
         return;
     }
-	int soDien, soNuoc, soNgay;
-	printf("Nhap so dien: ");
-    scanf("%d", &soDien);
-    printf("Nhap so nuoc: ");
-    scanf("%d", &soNuoc);
+
     printf("Nhap so ngay o: ");
-    scanf("%d", &soNgay);
+    if (scanf("%d", &soNgay) != 1 || soNgay < 0) {
+        printf("So ngay o khong hop le.\n");
+        free(newHoaDon); // Gi?i phóng b? nh?
+        return;
+    }
+	
+    taoMaHoaDon(newHoaDon->maHoaDon);
+    newHoaDon->tienPhong = giaPhong * soNgay;
+    newHoaDon->tienDien = giaDien * soDien;
+    newHoaDon->tienNuoc = giaNuoc * soNuoc;
 
-    // Automatically assign predefined values
-    taoMaHoaDon(newHoaDon -> maHoaDon);
-    newHoaDon->tienPhong = giaDien*soDien;
-    newHoaDon->tienDien = giaNuoc*soNuoc;
-    newHoaDon->tienNuoc = giaPhong*soNgay;
-
-    // Calculate the total amount
     newHoaDon->tongTien = newHoaDon->tienPhong + newHoaDon->tienDien + newHoaDon->tienNuoc;
-    newHoaDon->daThanhToan=0;
+    newHoaDon->daThanhToan = 0;
+
     newHoaDon->next = danhSachHoaDon;
     danhSachHoaDon = newHoaDon;
 
@@ -77,6 +87,7 @@ void themHoaDon() {
 
     luuHoaDonVaoFile();
 }
+
 
 // Sua hoa don
 void suaHoaDon(struct HoaDon *danhSachHoaDon) {
@@ -229,7 +240,7 @@ void hienThiHoaDonChuaThanhToan() {
                        "Ma Phong", "Tien Phong", "Tien Dien", "Tien Nuoc", "Tong Tien");
             }
             coHoaDonChuaThanhToan = 1;
-            printf("%-20s %-10.2f %-10.2f %-10.2f %-10.2f\n",
+            printf("%-20s %-10d %-10d %-10d %-10d\n",
                    current->maPhong, current->tienPhong,
                    current->tienDien, current->tienNuoc,
                    current->tongTien);
@@ -260,7 +271,7 @@ void docHoaDonTuFile() {
         int daThanhToanInt; // Bi?n t?m cho tr?ng thái thanh toán
 
         // Ð?c d? li?u t? t?p
-        if (fscanf(file, "%s %s %f %f %f %f %d", newHoaDon -> maHoaDon,
+        if (fscanf(file, "%s %s %d %d %d %d %d", newHoaDon -> maHoaDon,
                    newHoaDon->maPhong, &newHoaDon->tienPhong,
                    &newHoaDon->tienDien, &newHoaDon->tienNuoc,
                    &newHoaDon->tongTien, &daThanhToanInt) == 7) {

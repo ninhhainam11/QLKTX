@@ -6,19 +6,29 @@
 Phong* danhSachPhong = NULL;
 LoaiPhong* danhSachLoaiPhong = NULL;
 
+void taoMaPhong(char *maPhong) {
+    int soLuongPhong = 0;
+    Phong* phong = danhSachPhong;
+
+    // Count the number of invoices in the linked list
+    while (phong != NULL) {
+        soLuongPhong++;
+        phong = phong->next;
+    }
+
+    sprintf(maPhong, "P%04d", soLuongPhong + 1); 
+}
+
 void themPhong() {
     Phong* newPhong = (Phong*)malloc(sizeof(Phong));
     newPhong->next = NULL;
-
-    printf("Nhap ma phong: ");
-    scanf("%s", newPhong->maPhong);
     printf("Nhap so phong: ");
     scanf("%d", &newPhong->soPhong);
     printf("Nhap toa nha: ");
     scanf("%s", newPhong->toaNha);
     printf("Nhap loai phong: ");
     scanf("%d", &newPhong->loaiPhong);
-
+	taoMaPhong(newPhong->maPhong);
     newPhong->next = danhSachPhong;
     danhSachPhong = newPhong;
 

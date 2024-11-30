@@ -5,17 +5,23 @@
 SinhVien* danhSachSinhVien = NULL;
 
 // Function to create a new SinhVien
+// Function to create a new SinhVien
 SinhVien* taoSinhVien(char* maSinhVien, char* hoTen, char* ngSinh, char* lop, char* maPhong) {
     SinhVien* sv = (SinhVien*)malloc(sizeof(SinhVien));
     strcpy(sv->maSinhVien, maSinhVien);
     strcpy(sv->hoTen, hoTen);
-    strcpy(sv->ngSinh, ngSinh);
+    
+    // Parse ngSinh into ngaysinh structure (dd/mm/yyyy)
+    sscanf(ngSinh, "%d/%d/%d", &sv->ngaysinh.ngay, &sv->ngaysinh.thang, &sv->ngaysinh.nam);
+
     strcpy(sv->lop, lop);
     strcpy(sv->maPhong, maPhong);
     sv->next = NULL;
     return sv;
 }
 
+
+// Add a new SinhVien
 // Add a new SinhVien
 void themSinhVien() {
     char maSinhVien[10], hoTen[50], ngSinh[50], lop[50], maPhong[10];
@@ -30,8 +36,8 @@ void themSinhVien() {
     strtok(hoTen, "\n"); // Remove trailing newline
 
     printf("Nhap ngay sinh (dd/mm/yyyy): ");
-    scanf("%s", ngSinh);
-
+    scanf("%s", ngSinh);  // Input as string
+    
     printf("Nhap lop: ");
     scanf("%s", lop);
 
@@ -45,12 +51,14 @@ void themSinhVien() {
         }
     } while (!phong);
 
+    // Create new SinhVien using the provided information
     SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngSinh, lop, maPhong);
     sv->next = danhSachSinhVien;
     danhSachSinhVien = sv;
 
     printf("Them sinh vien thanh cong.\n");
 }
+
 
 // Display all SinhVien in the list
 void hienThiDanhSachSinhVien() {
@@ -106,7 +114,7 @@ void suaSinhVien() {
     strtok(sv->hoTen, "\n");
 
     printf("Ngay Sinh (dd/mm/yyyy): ");
-    scanf("%s", sv->ngSinh);
+    scanf("%d/%d/%d", &sv->ngaysinh.ngay, &sv->ngaysinh.thang, &sv->ngaysinh.nam);  // Input as separate integers
 
     printf("Lop: ");
     scanf("%s", sv->lop);
@@ -124,6 +132,7 @@ void suaSinhVien() {
     strcpy(sv->maPhong, maPhong);
     printf("Sua thong tin sinh vien thanh cong.\n");
 }
+
 
 // Delete SinhVien
 void xoaSinhVien() {

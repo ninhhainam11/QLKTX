@@ -5,12 +5,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Ngay{
+	int ngay;
+	int thang;
+	int nam;
+};
+
 typedef struct SinhVien {
     char maSinhVien[10];
     char hoTen[50];
     char ngSinh[50];
     char lop[50];
-    char maPhong[10]; // Room ID
+    Ngay ngaysinh;
     struct SinhVien* next;
 } SinhVien;
 
