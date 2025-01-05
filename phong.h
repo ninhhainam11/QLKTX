@@ -10,22 +10,22 @@ typedef struct LoaiPhong {
     int soSinhVien;
     int dienTich;
     int donGia;
-    struct LoaiPhong* next;
+    struct LoaiPhong* next; 
 } LoaiPhong;
 
 typedef struct Phong {
     char maPhong[10];
     int soPhong;
     char toaNha[50];
-    LoaiPhong loaiPhong;
+    int loaiPhong;
+    int soSinhVienHienTai;
     struct Phong* next;
 } Phong;
 
-// External references
 extern Phong* danhSachPhong;
 extern LoaiPhong* danhSachLoaiPhong;
 
-// Room functions
+void menuPhong();
 void themPhong();
 void suaPhong();
 void xoaPhong();
@@ -34,16 +34,15 @@ void giaiPhongBoNho();
 Phong* timPhong(const char* maPhong);
 void luuDanhSachPhong();
 void taiDanhSachPhong();
+int kiemTraPhongTonTai(Phong* danhSachPhong, const char* maPhong);
 void menuphong();
-
-// Room type functions
+LoaiPhong* timLoaiPhong(int maLoaiPhong);
 void themLoaiPhong();
 void suaLoaiPhong();
 void xoaLoaiPhong();
 void hienThiDanhSachLoaiPhong();
-void giaiPhongBoNhoLoaiPhong();
 void luuDanhSachLoaiPhong();
 void taiDanhSachLoaiPhong();
 
-#endif // PHONG_H
+#endif 
 

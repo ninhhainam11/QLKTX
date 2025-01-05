@@ -1,11 +1,9 @@
 #include <stdio.h>
-#include "gia.h"
-
+#include "phong.cpp"
 int giaDien = 3;  
 int giaNuoc = 2;  
-int giaPhong = 1000; 
 
-void docGiaTuFile() {
+void taiGia() {
     FILE *file = fopen("gia.txt", "r");
     if (file == NULL) {
         printf("Loi mo file. Su dung gia mac dinh.\n");
@@ -13,7 +11,7 @@ void docGiaTuFile() {
     }
 
  
-    if (fscanf(file, "%d", &giaDien) != 1 || fscanf(file, "%d", &giaNuoc) != 1 || fscanf(file, "%d", &giaPhong) != 1) {
+    if (fscanf(file, "%d", &giaDien) != 1 || fscanf(file, "%d", &giaNuoc) != 1) {
         printf("Loi doc du lieu tu file.\n");
     }
 
@@ -21,7 +19,7 @@ void docGiaTuFile() {
 }
 
 
-void ghiGiaVaoFile() {
+void luuGia() {
     FILE *file = fopen("gia.txt", "w");
     if (file == NULL) {
         printf("Loi mo file.\n");
@@ -29,42 +27,64 @@ void ghiGiaVaoFile() {
     }
     fprintf(file, "%d\n", giaDien);
     fprintf(file, "%d\n", giaNuoc);
-    fprintf(file, "%d\n", giaPhong);
     fclose(file);
     printf("Gia moi da duoc luu");
 }
 
 
 void hienThiGia() {
-    printf("Gia dien: %d VND\n", giaDien);
+    printf("\nGia dien: %d VND\n", giaDien);
     printf("Gia nuoc: %d VND\n", giaNuoc);
+
+    printf("\n%-15s | %-15s\n", "Ma Loai Phong", "Don Gia (VND)");
+    printf("-------------------------------------\n");
+
     LoaiPhong* p = danhSachLoaiPhong;
-    printf("Danh sach loai phong:\n");
     while (p != NULL) {
-        printf("Ma loai phong: %d, Don gia: %d\n",
-               p->maLoaiPhong, p->donGia);
+        printf("%-15d | %-15d\n", p->maLoaiPhong, p->donGia);
         p = p->next;
     }
+
+    printf("-------------------------------------\n");
 }
+
 
 
 void thayDoiGiaDien() {
-    printf("Nhap gia dien moi: ");
-    scanf("%d", &giaDien);
+    int giaDienMoi;
+    do {
+        printf("Nhap gia dien moi: ");
+        scanf("%d", &giaDienMoi);
+        if (giaDienMoi <= 0) {
+            printf("Gia dien phai lon hon 0. Vui long nhap lai.\n");
+        }
+    } while (giaDienMoi <= 0);
+
+    giaDien = giaDienMoi;
     printf("Thay doi gia dien thanh cong. Gia moi: %d VND\n", giaDien);
-    ghiGiaVaoFile();  // Save new prices to file
+    luuGia();  
 }
+
 
 
 void thayDoiGiaNuoc() {
-    printf("Nhap gia nuoc moi: ");
-    scanf("%d", &giaNuoc);
+    int giaNuocMoi;
+    do {
+        printf("Nhap gia nuoc moi: ");
+        scanf("%d", &giaNuocMoi);
+        if (giaNuocMoi <= 0) {
+            printf("Gia nuoc phai lon hon 0. Vui long nhap lai.\n");
+        }
+    } while (giaNuocMoi <= 0);
+
+    giaNuoc = giaNuocMoi;
     printf("Thay doi gia nuoc thanh cong. Gia moi: %d VND\n", giaNuoc);
-    ghiGiaVaoFile();
+    luuGia();  
 }
 
 
-void menugia() {
+
+void menuGia() {
     int choice;
 	system("cls");
     do {
@@ -73,7 +93,7 @@ void menugia() {
         printf("2. Thay doi gia nuoc\n");
         printf("3. Hien thi gia\n");
         printf("0. Quay lai menu chinh\n");
-        printf("Chon: ");
+        printf("Nhap lua chon: ");
         scanf("%d", &choice);
 
         switch (choice) {
@@ -87,8 +107,7 @@ void menugia() {
             	hienThiGia();
             	break;
             case 0:
-                printf("Quay lai menu chinh.\n");
-                return;
+                break;
             default:
                 printf("Lua chon khong hop le. Vui long thu lai.\n");
         }

@@ -5,27 +5,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct HoaDon {
-	char maHoaDon[20];
+typedef struct HoaDon{
+    char maHoaDon[20];
     char maPhong[50];
     int tienPhong;
     int tienDien;
     int tienNuoc;
     int tongTien;
     int daThanhToan;
-    struct HoaDon *next; 
-};
+} HoaDon;
 
-// Function declarations
-void themHoaDon(struct HoaDon **danhSachHoaDon);
-void suaHoaDon(struct HoaDon *danhSachHoaDon);
-void xoaHoaDon(struct HoaDon **danhSachHoaDon);
-void hienThiHoaDon(struct HoaDon *danhSachHoaDon);
-void hienThiHoaDonTheoMaPhong(struct HoaDon *danhSachHoaDon, const char *maPhong);
+typedef struct DanhSachHoaDon{
+    HoaDon data;
+    struct DanhSachHoaDon *next;
+} DanhSachHoaDon;
+
+void themHoaDon();
+void suaHoaDon();
+void xoaHoaDon();
+void hienThiHoaDon();
+void hienThiHoaDonTheoMaPhong();
+void docHoaDonTuFile();
 void luuHoaDonVaoFile();
-int kiemTraMaPhongTonTai(struct HoaDon *danhSachHoaDon, const char *maPhong);
+int kiemTraMaPhongTonTai();
 void hienThiHoaDonChuaThanhToan();
-void hienThiMenu();
+void menuHoaDon();
 
 #endif
 

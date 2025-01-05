@@ -5,25 +5,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Ngay{
-	int ngay;
-	int thang;
-	int nam;
-};
-
 typedef struct SinhVien {
-    char maSinhVien[10];
+    char maSinhVien[15];
     char hoTen[50];
-    char ngSinh[50];
+	char ngaySinh[15];
     char lop[50];
-    Ngay ngaysinh;
+    char gioiTinh[10];
+    char maPhong[10];
     struct SinhVien* next;
 } SinhVien;
 
-// Declaration of danhSachSinhVien (external reference)
 extern SinhVien* danhSachSinhVien;
 
-// Function prototypes
 SinhVien* taoSinhVien(char* maSinhVien, char* hoTen, char* ngSinh, char* lop, char* maPhong);
 void themSinhVien();
 void hienThiDanhSachSinhVien();
@@ -35,7 +28,7 @@ void luuDanhSachSinhVien();
 void taiDanhSachSinhVien();
 void themSinhVienVaoPhong();
 void chuyenPhongChoSinhVien();
-void menusv();
+void menuSinhVien();
 
-#endif // SINHVIEN_H
+#endif
 

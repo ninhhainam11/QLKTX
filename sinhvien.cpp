@@ -1,105 +1,166 @@
-#include "sinhvien.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "phong.h"
-
+#include "sinhvien.h"
 
 SinhVien* danhSachSinhVien = NULL;
 
-// Function to create a new SinhVien
-// Function to create a new SinhVien
-SinhVien* taoSinhVien(char* maSinhVien, char* hoTen, char* ngSinh, char* lop, char* maPhong) {
+SinhVien* taoSinhVien(char* maSinhVien, char* hoTen, char* ngaySinh, char* lop, char* maPhong, char* gioiTinh) {
     SinhVien* sv = (SinhVien*)malloc(sizeof(SinhVien));
     strcpy(sv->maSinhVien, maSinhVien);
     strcpy(sv->hoTen, hoTen);
-    
-    // Parse ngSinh into ngaysinh structure (dd/mm/yyyy)
-    sscanf(ngSinh, "%d/%d/%d", &sv->ngaysinh.ngay, &sv->ngaysinh.thang, &sv->ngaysinh.nam);
-
+    strcpy(sv->ngaySinh, ngaySinh);
     strcpy(sv->lop, lop);
+    strcpy(sv->gioiTinh, gioiTinh);
     strcpy(sv->maPhong, maPhong);
     sv->next = NULL;
     return sv;
 }
 
+int kiemTraNgaySinh(const char* ngaySinh) {
+    int ngay, thang, nam;
+    if (sscanf(ngaySinh, "%d/%d/%d", &ngay, &thang, &nam) == 3) {
+        if (nam >= 1900 && nam <= 2024 && thang >= 1 && thang <= 12 && ngay >= 1 && ngay <= 31) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-// Add a new SinhVien
-// Add a new SinhVien
+SinhVien* timSinhVien(const char* maSinhVien) {
+    SinhVien* p = danhSachSinhVien;
+    while (p != NULL) {
+        if (strcmp(p->maSinhVien, maSinhVien) == 0) {
+            return p; 
+        }
+        p = p->next;
+    }
+    return NULL; 
+}
+
 void themSinhVien() {
-    char maSinhVien[10], hoTen[50], ngSinh[50], lop[50], maPhong[10];
+    char maSinhVien[15], hoTen[50], ngaySinh[15], lop[50], maPhong[10], gioiTinh[10];
     Phong* phong = NULL;
+    LoaiPhong* lp = NULL;
 
-    printf("Nhap ma sinh vien: ");
-    scanf("%s", maSinhVien);
+    fflush(stdin);
 
-    printf("Nhap ho ten: ");
-    getchar(); // Consume newline
-    fgets(hoTen, sizeof(hoTen), stdin);
-    strtok(hoTen, "\n"); // Remove trailing newline
+    do {
+        printf("Nhap ma sinh vien: ");
+        fgets(maSinhVien, sizeof(maSinhVien), stdin);
+        maSinhVien[strcspn(maSinhVien, "\n")] = 0;
+        if (strlen(maSinhVien) == 0) {
+            printf("Ma sinh vien khong duoc de trong!\n");
+        } else if (timSinhVien(maSinhVien)) {
+            printf("Ma sinh vien da ton tai!\n");
+        }
+    } while (strlen(maSinhVien) == 0 || timSinhVien(maSinhVien));
 
-    printf("Nhap ngay sinh (dd/mm/yyyy): ");
-    scanf("%s", ngSinh);  // Input as string
-    
-    printf("Nhap lop: ");
-    scanf("%s", lop);
+    do {
+        printf("Nhap ho ten: ");
+        fgets(hoTen, sizeof(hoTen), stdin);
+        hoTen[strcspn(hoTen, "\n")] = 0;
+        if (strlen(hoTen) == 0) {
+            printf("Ho ten khong duoc de trong!\n");
+        }
+    } while (strlen(hoTen) == 0);
+
+    do {
+        printf("Nhap ngay sinh (dd/mm/yyyy): ");
+        fgets(ngaySinh, sizeof(ngaySinh), stdin);
+        ngaySinh[strcspn(ngaySinh, "\n")] = 0;
+        if (strlen(ngaySinh) == 0 || !kiemTraNgaySinh(ngaySinh)) {
+            printf("Ngay sinh khong hop le! Vui long nhap lai.\n");
+        }
+    } while (strlen(ngaySinh) == 0 || !kiemTraNgaySinh(ngaySinh));
+
+    do {
+        printf("Nhap lop: ");
+        fgets(lop, sizeof(lop), stdin);
+        lop[strcspn(lop, "\n")] = 0;
+        if (strlen(lop) == 0) {
+            printf("Lop khong duoc de trong!\n");
+        }
+    } while (strlen(lop) == 0);
+
+    do {
+        printf("Nhap gioi tinh (Nam/Nu): ");
+        fgets(gioiTinh, sizeof(gioiTinh), stdin);
+        gioiTinh[strcspn(gioiTinh, "\n")] = 0;
+        if (strcmp(gioiTinh, "Nam") != 0 && strcmp(gioiTinh, "Nu") != 0) {
+            printf("Gioi tinh chi duoc nhap 'Nam' hoac 'Nu'!\n");
+        }
+    } while (strcmp(gioiTinh, "Nam") != 0 && strcmp(gioiTinh, "Nu") != 0);
 
     do {
         printf("Nhap ma phong: ");
-        scanf("%s", maPhong);
+        fgets(maPhong, sizeof(maPhong), stdin);
+        maPhong[strcspn(maPhong, "\n")] = 0;
 
         phong = timPhong(maPhong);
         if (!phong) {
-            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhong);
+            printf("Ma phong khong ton tai!\n");
+        } else {
+            lp = timLoaiPhong(phong->loaiPhong);
+            if (!lp) {
+                printf("Loai phong khong ton tai!\n");
+            } else if (phong->soSinhVienHienTai >= lp->soSinhVien) {
+                printf("Phong da day sinh vien!\n");
+            }
         }
-    } while (!phong);
+    } while (strlen(maPhong) == 0 || !phong || !lp || phong->soSinhVienHienTai >= lp->soSinhVien);
 
-    // Create new SinhVien using the provided information
-    SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngSinh, lop, maPhong);
+    SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngaySinh, lop, maPhong, gioiTinh);
     sv->next = danhSachSinhVien;
     danhSachSinhVien = sv;
 
-    printf("Them sinh vien thanh cong.\n");
+    phong->soSinhVienHienTai++;
+    luuDanhSachPhong();
+    luuDanhSachSinhVien();
+
+    printf("Them sinh vien thanh cong!\n");
 }
 
 
-// Display all SinhVien in the list
+
 void hienThiDanhSachSinhVien() {
-    SinhVien* current = danhSachSinhVien;
-    if (!current) {
+    SinhVien* p = danhSachSinhVien;
+    if (!p) {
         printf("Danh sach sinh vien rong.\n");
         return;
     }
 
-    printf("\n--- Danh sach sinh vien ---\n");
-    while (current) {
-        printf("Ma Sinh Vien: %s\n", current->maSinhVien);
-        printf("Ho Ten: %s\n", current->hoTen);
-        printf("Ngay Sinh: %s\n", current->ngSinh);
-        printf("Lop: %s\n", current->lop);
-        printf("Ma Phong: %s\n", current->maPhong);
-        printf("---------------------------\n");
-        current = current->next;
+    printf("\n%-15s | %-50s | %-15s | %-10s | %-10s | %-10s\n", 
+           "Ma SV", "Ho Ten", "Ngay Sinh", "Lop","Gioi Tinh", "Ma Phong" );
+    printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
+
+    while (p) {
+        printf("%-15s | %-50s | %-15s | %-10s | %-10s | %-10s\n", 
+        p->maSinhVien, p->hoTen, p->ngaySinh, p->lop, p->gioiTinh, p->maPhong);
+        p = p->next;
     }
+
+    printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
 }
 
-// Find a SinhVien by maSinhVien
-SinhVien* timSinhVien(const char* maSinhVien) {
-    SinhVien* current = danhSachSinhVien;
-    while (current) {
-        if (strcmp(current->maSinhVien, maSinhVien) == 0) {
-            return current;
-        }
-        current = current->next;
-    }
-    return NULL;
-}
 
-// Update SinhVien information
 void suaSinhVien() {
-    char maSinhVien[10];
-    char maPhong[10];
+    char maSinhVien[15];
+    char hoTen[50], ngaySinh[15], lop[50], gioiTinh[10], maPhong[10];
     Phong* phong = NULL;
+    LoaiPhong* lp = NULL;
 
-    printf("Nhap ma sinh vien can sua: ");
-    scanf("%s", maSinhVien);
+    fflush(stdin);
+
+    do {
+        printf("Nhap ma sinh vien can sua: ");
+        fgets(maSinhVien, sizeof(maSinhVien), stdin);
+        maSinhVien[strcspn(maSinhVien, "\n")] = 0;
+        if (strlen(maSinhVien) == 0) {
+            printf("Ma sinh vien khong duoc de trong!\n");
+        }
+    } while (strlen(maSinhVien) == 0);
 
     SinhVien* sv = timSinhVien(maSinhVien);
     if (!sv) {
@@ -108,69 +169,118 @@ void suaSinhVien() {
     }
 
     printf("Nhap thong tin moi:\n");
-    printf("Ho Ten: ");
-    getchar(); // Consume newline
-    fgets(sv->hoTen, sizeof(sv->hoTen), stdin);
-    strtok(sv->hoTen, "\n");
 
-    printf("Ngay Sinh (dd/mm/yyyy): ");
-    scanf("%d/%d/%d", &sv->ngaysinh.ngay, &sv->ngaysinh.thang, &sv->ngaysinh.nam);  // Input as separate integers
+    do {
+        printf("Nhap ho ten: ");
+        fgets(hoTen, sizeof(hoTen), stdin);
+        hoTen[strcspn(hoTen, "\n")] = 0;
+        if (strlen(hoTen) == 0) {
+            printf("Ho ten khong duoc de trong!\n");
+        }
+    } while (strlen(hoTen) == 0);
 
-    printf("Lop: ");
-    scanf("%s", sv->lop);
+    do {
+        printf("Nhap ngay sinh (dd/mm/yyyy): ");
+        fgets(ngaySinh, sizeof(ngaySinh), stdin);
+        ngaySinh[strcspn(ngaySinh, "\n")] = 0;
+        if (strlen(ngaySinh) == 0 || !kiemTraNgaySinh(ngaySinh)) {
+            printf("Ngay sinh khong hop le! Vui long nhap lai.\n");
+        }
+    } while (strlen(ngaySinh) == 0 || !kiemTraNgaySinh(ngaySinh));
+
+    do {
+        printf("Nhap lop: ");
+        fgets(lop, sizeof(lop), stdin);
+        lop[strcspn(lop, "\n")] = 0;
+        if (strlen(lop) == 0) {
+            printf("Lop khong duoc de trong!\n");
+        }
+    } while (strlen(lop) == 0);
+
+    do {
+        printf("Nhap gioi tinh: ");
+        fgets(gioiTinh, sizeof(gioiTinh), stdin);
+        gioiTinh[strcspn(gioiTinh, "\n")] = 0;
+        if (strlen(gioiTinh) == 0) {
+            printf("Gioi tinh khong duoc de trong!\n");
+        }
+    } while (strlen(gioiTinh) == 0);
 
     do {
         printf("Nhap ma phong: ");
-        scanf("%s", maPhong);
+        fgets(maPhong, sizeof(maPhong), stdin);
+        maPhong[strcspn(maPhong, "\n")] = 0;
 
         phong = timPhong(maPhong);
         if (!phong) {
-            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhong);
+            printf("Ma phong khong ton tai!\n");
+        } else {
+            lp = timLoaiPhong(phong->loaiPhong);
+            if (!lp) {
+                printf("Loai phong khong ton tai!\n");
+            } else if (phong->soSinhVienHienTai >= lp->soSinhVien) {
+                printf("Phong da day sinh vien!\n");
+            }
         }
-    } while (!phong);
+    } while (strlen(maPhong) == 0 || !phong || !lp || phong->soSinhVienHienTai >= lp->soSinhVien);
 
-    strcpy(sv->maPhong, maPhong);
+    strcpy(sv->hoTen, hoTen);
+    strcpy(sv->ngaySinh, ngaySinh);
+    strcpy(sv->gioiTinh, gioiTinh);
+    strcpy(sv->lop, lop);
+    
+
+    if (strcmp(sv->maPhong, maPhong) != 0) {
+        Phong* phongCu = timPhong(sv->maPhong);
+        if (phongCu) {
+            phongCu->soSinhVienHienTai--;
+        }
+        strcpy(sv->maPhong, maPhong);
+        phong->soSinhVienHienTai++;
+    }
+
+    luuDanhSachSinhVien();
+    luuDanhSachPhong();
+
     printf("Sua thong tin sinh vien thanh cong.\n");
 }
 
 
-// Delete SinhVien
+
 void xoaSinhVien() {
-    char maSinhVien[10];
+    char maSinhVien[15];
     printf("Nhap ma sinh vien can xoa: ");
     scanf("%s", maSinhVien);
 
-    SinhVien *current = danhSachSinhVien, *prev = NULL;
-    while (current) {
-        if (strcmp(current->maSinhVien, maSinhVien) == 0) {
+    SinhVien *p = danhSachSinhVien, *prev = NULL;
+    while (p) {
+        if (strcmp(p->maSinhVien, maSinhVien) == 0) {
             if (prev) {
-                prev->next = current->next;
+                prev->next = p->next;
             } else {
-                danhSachSinhVien = current->next;
+                danhSachSinhVien = p->next;
             }
-            free(current);
+            free(p);
             printf("Xoa sinh vien thanh cong.\n");
             return;
         }
-        prev = current;
-        current = current->next;
+        prev = p;
+        p = p->next;
     }
-
+    luuDanhSachSinhVien();
     printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
 }
 
-// Free allocated memory
 void giaiPhongBoNhoSinhVien() {
-    SinhVien* current = danhSachSinhVien;
-    while (current) {
-        SinhVien* temp = current;
-        current = current->next;
+    SinhVien* p = danhSachSinhVien;
+    while (p) {
+        SinhVien* temp = p;
+        p = p->next;
         free(temp);
     }
     danhSachSinhVien = NULL;
 }
 
-// Save SinhVien list to file
 void luuDanhSachSinhVien() {
     FILE* file = fopen("sinhvien.txt", "w");
     if (!file) {
@@ -178,21 +288,21 @@ void luuDanhSachSinhVien() {
         return;
     }
 
-    SinhVien* current = danhSachSinhVien;
-    while (current) {
-        fprintf(file, "%s %s %s %s %s\n", 
-                current->maSinhVien, 
-                current->hoTen, 
-                current->ngSinh, 
-                current->lop, 
-                current->maPhong);
-        current = current->next;
+    SinhVien* p = danhSachSinhVien;
+    while (p) {
+        fprintf(file, "%s\n%s\n%s\n%s\n%s\n%s\n", 
+                p->maSinhVien, 
+                p->hoTen, 
+                p->ngaySinh, 
+                p->lop, 
+                p->gioiTinh, 
+                p->maPhong);
+        p = p->next;
     }
     fclose(file);
     printf("Luu danh sach sinh vien thanh cong.\n");
 }
 
-// Load SinhVien list from file
 void taiDanhSachSinhVien() {
     FILE* file = fopen("sinhvien.txt", "r");
     if (!file) {
@@ -200,98 +310,81 @@ void taiDanhSachSinhVien() {
         return;
     }
 
-    char maSinhVien[10], hoTen[50], ngSinh[50], lop[50], maPhong[10];
-    while (fscanf(file, "%s %s %s %s %s", maSinhVien, hoTen, ngSinh, lop, maPhong) == 5) {
-        SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngSinh, lop, maPhong);
+    char maSinhVien[15], hoTen[50], ngaySinh[15], lop[50], gioiTinh[10], maPhong[10];
+    while (fscanf(file, "%s\n", maSinhVien) == 1) {
+        fgets(hoTen, sizeof(hoTen), file);
+        hoTen[strcspn(hoTen, "\n")] = 0; 
+
+        fscanf(file, "%s\n", ngaySinh);
+        fscanf(file, "%s\n", lop);
+        fscanf(file, "%s\n", gioiTinh);
+        fscanf(file, "%s\n", maPhong);
+
+        SinhVien* sv = taoSinhVien(maSinhVien, hoTen, ngaySinh, lop, gioiTinh, maPhong);
         sv->next = danhSachSinhVien;
         danhSachSinhVien = sv;
     }
     fclose(file);
 }
 
-// Function to add a student to a room
-void themSinhVienVaoPhong() {
-    char maSinhVien[10];
-    char maPhong[10];
-    Phong* phong = NULL;
 
-    printf("Nhap ma sinh vien: ");
+void hienThiSinhVienTheoMaSinhVien() {
+    char maSinhVien[15];
+    printf("Nhap ma sinh vien can tim: ");
     scanf("%s", maSinhVien);
 
-    SinhVien* sv = timSinhVien(maSinhVien);
-    if (!sv) {
-        printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
+    SinhVien* p = danhSachSinhVien;
+
+    if (!p) {
+        printf("Danh sach sinh vien rong.\n");
         return;
     }
 
-    do {
-        printf("Nhap ma phong: ");
-        scanf("%s", maPhong);
+    printf("\n%-15s | %-50s | %-15s | %-10s | %-10s | %-10s\n", 
+           "Ma SV", "Ho Ten", "Ngay Sinh", "Lop", "Gioi Tinh", "Ma Phong");
+    printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
 
-        phong = timPhong(maPhong);
-        if (!phong) {
-            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhong);
+    while (p) {
+        if (strcmp(p->maSinhVien, maSinhVien) == 0) {
+            printf("%-15s | %-50s | %-15s | %-10s | %-10s | %-10s\n", 
+                   p->maSinhVien, 
+                   p->hoTen, 
+                   p->ngaySinh, 
+                   p->lop, 
+                   p->gioiTinh, 
+                   p->maPhong);
+            printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
+            return;
         }
-    } while (!phong);
-
-    strcpy(sv->maPhong, maPhong);
-    printf("Da them sinh vien %s vao phong %s.\n", maSinhVien, maPhong);
-}
-
-// Function to transfer a student to another room
-void chuyenPhongChoSinhVien() {
-    char maSinhVien[10];
-    char maPhongMoi[10];
-    Phong* phongMoi = NULL;
-
-    printf("Nhap ma sinh vien: ");
-    scanf("%s", maSinhVien);
-
-    SinhVien* sv = timSinhVien(maSinhVien);
-    if (!sv) {
-        printf("Khong tim thay sinh vien voi ma: %s\n", maSinhVien);
-        return;
+        p = p->next;
     }
 
-    do {
-        printf("Nhap ma phong moi: ");
-        scanf("%s", maPhongMoi);
-
-        phongMoi = timPhong(maPhongMoi);
-        if (!phongMoi) {
-            printf("Phong voi ma %s khong ton tai. Vui long nhap lai.\n", maPhongMoi);
-        }
-    } while (!phongMoi);
-
-    strcpy(sv->maPhong, maPhongMoi);
-    printf("Da chuyen sinh vien %s sang phong %s.\n", maSinhVien, maPhongMoi);
+    printf("Khong tim thay sinh vien co ma: %s\n", maSinhVien);
 }
 
 
-// Menu for SinhVien functions
-void menusv() {
+
+void menuSinhVien() {
     int choice;
     system("cls");
     do {
-        printf("\n--- Menu Sinh Vien ---\n");
+        printf("\n--- MENU QUAN LY SINH VIEN ---\n");
         printf("1. Them sinh vien\n");
         printf("2. Hien thi danh sach sinh vien\n");
         printf("3. Sua sinh vien\n");
         printf("4. Xoa sinh vien\n");
-        printf("5. Them sinh vien vao phong\n");
-        printf("6. Chuyen phong cho sinh vien\n");
+        printf("5. Hien thi sinh vien theo ma sinh vien\n");
         printf("0. Thoat\n");
-        printf("Chon chuc nang: ");
+        printf("Nhap lua chon: ");
         scanf("%d", &choice);
 
         switch (choice) {
-            case 1: themSinhVien();luuDanhSachSinhVien(); break;
+            case 1: themSinhVien(); break;
             case 2: hienThiDanhSachSinhVien(); break;
-            case 3: suaSinhVien();luuDanhSachSinhVien(); break;
-            case 4: xoaSinhVien();luuDanhSachSinhVien(); break;
-            case 5: themSinhVienVaoPhong();luuDanhSachSinhVien(); break;
-            case 6: chuyenPhongChoSinhVien();luuDanhSachSinhVien(); break;
-            case 0: break;
+            case 3: suaSinhVien(); break;
+            case 4: xoaSinhVien(); break;
+            case 5: hienThiSinhVienTheoMaSinhVien(); break;
+            case 0: giaiPhongBoNhoSinhVien();break;
             default: printf("Lua chon sai, vui long chon lai.\n"); break;
         }
     } while (choice != 0);
